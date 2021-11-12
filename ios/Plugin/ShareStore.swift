@@ -3,17 +3,22 @@ import Foundation
 public final class ShareStore {
 
     public static let store = ShareStore()
-    private init() {
-        self.title = ""
-        self.description = ""
-        self.type = ""
-        self.url = ""
-        self.processed = false
-    }
+    
+    public init() {}
 
-    public var title: String;
-    public var description: String;
-    public var type: String;
-    public var url: String;
-    public var processed: Bool;
+    public var title: String = ""
+    public var description: String = ""
+    public var type: String = ""
+    public var url: String = ""
+    public var additionalItems: Array<ShareStore> = Array()
+    public var processed: Bool = false
+    
+    public func clear() {
+        title = ""
+        description = ""
+        type = ""
+        url = ""
+        processed = false
+        additionalItems = Array()
+    }
 }

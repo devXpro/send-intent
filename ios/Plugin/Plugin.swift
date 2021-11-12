@@ -12,16 +12,39 @@ public class SendIntent: CAPPlugin {
 
     @objc func checkSendIntentReceived(_ call: CAPPluginCall) {
         if !store.processed {
-            call.resolve([
-                "title": store.title,
-                "description": store.description,
-                "type": store.type,
-                "url": store.url
-            ])
+            let data = buildData()
+            call.resolve(data)
+            store.clear()
             store.processed = true
         } else {
             call.reject("No processing needed.")
         }
+    }
+    
+    private func buildData() -> [String: Any] {
+        var data: [String: Any] = [
+            "title": store.title,
+            "description": store.description,
+            "type": store.type,
+            "url": store.url
+        ]
+        
+        if (!store.additionalItems.isEmpty) {
+            var additionalItems = [[String: Any]]()
+            for item in store.additionalItems {
+                let itemAsData: [String: Any] = [
+                    "title": item.title,
+                    "description": item.description,
+                    "type": item.type,
+                    "url": item.url
+                ]
+                additionalItems.append(itemAsData)
+            }
+            
+            data["additionalItems"] = additionalItems
+        }
+        
+        return data
     }
 
     public override func load() {
