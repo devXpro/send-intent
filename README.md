@@ -310,6 +310,71 @@ window.addEventListener("sendIntentReceived", () => {
 })
 ```
 
+## Another approach to ShareViewController without the default dialog box (extending from UIViewController) and support to multiple files.
+I just moved all generic code to some helper class inside the send-intent plugin
+
+Code for the ShareViewController:
+
+```swift
+import SendIntent
+
+class ShareViewController: NoDialogBoxShareViewController {
+
+    override
+    public func getAppGroupId() -> String {
+        return "YOUR_APP_GROUP_ID"
+    }
+
+    override
+    public func getAppUrlScheme() -> String {
+        return "YOUR_APP_URL_SCHEME"
+    }
+}
+```
+
+And the AppDelegate.swift to support multiple files:
+
+```swift
+// ...
+
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    // ...
+
+    func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        var success = false
+    
+        // ...
+              
+        // post share-with notification
+        success = SendIntentAppDelegateHelper.PostNotification(url: url)
+        
+        return success
+    }
+
+    // ...
+}
+```
+
+Also, you need to update your Podfile with:
+```
+// ...
+
+target 'YOUR_SHAREWITH_TARGET_NAME' do
+  pod 'SendIntent', :path => '../../node_modules/send-intent'
+end
+
+# https://stackoverflow.com/questions/48122769/facebook-cocoapods-sharedapplication-is-unavailable-not-available-on-ios-app
+# https://stackoverflow.com/a/56789751
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'No'
+    end
+  end
+end
+```
+
 ## Donation
 
 If you want to support my work, you can donate me on bitcoin:bc1q60ntnlz4wqfup3yg3hyqmzfkuraf8clmvupqvs
