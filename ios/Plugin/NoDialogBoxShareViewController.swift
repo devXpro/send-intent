@@ -17,16 +17,17 @@ open class NoDialogBoxShareViewController: UIViewController {
     private let CONTENTTYPE_TEXT = kUTTypeText as String
     private let CONTENTTYPE_IMAGE = kUTTypeImage as String
     private let CONTENTTYPE_MOVIE = kUTTypeMovie as String
+    private let CONTENTTYPE_PDF = kUTTypePDF as String
 
     class AttachmentURL {
         public var title: String? = ""
         public var type: String? = ""
         public var url: String? = ""
     }
-    
+
     private var attachmentsURL: [AttachmentURL] = []
-    
-    
+
+
     open func getAppGroupId() -> String {
         return "YOUR_APP_GROUP_ID. Override this method in your ViewControler."
     }
@@ -41,7 +42,7 @@ open class NoDialogBoxShareViewController: UIViewController {
         super.viewDidLoad()
         handleInputItem()
     }
-    
+
     override
     public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -52,15 +53,17 @@ open class NoDialogBoxShareViewController: UIViewController {
         self.extensionContext!.completeRequest(returningItems: [], completionHandler: nil)
     }
 
-    
+
     private func handleInputItem() {
         guard let extensionItem = extensionContext?.inputItems.first as? NSExtensionItem else {
                 return
         }
-        
+
         for attachment in extensionItem.attachments ?? [] {
             if attachment.hasItemConformingToTypeIdentifier(CONTENTTYPE_TEXT) {
                 handleInputText(itemProvider: attachment)
+            } else if attachment.hasItemConformingToTypeIdentifier(CONTENTTYPE_PDF) {
+                handleInputPdf(itemProvider: attachment)
             } else if attachment.hasItemConformingToTypeIdentifier(CONTENTTYPE_URL) {
                 handleInputURL(itemProvider: attachment)
             } else if attachment.hasItemConformingToTypeIdentifier(CONTENTTYPE_IMAGE) {
@@ -70,7 +73,7 @@ open class NoDialogBoxShareViewController: UIViewController {
             }
         }
     }
-    
+
     private func handleInputText(itemProvider: NSItemProvider) {
         itemProvider.loadItem(forTypeIdentifier: CONTENTTYPE_TEXT, options: nil, completionHandler: { (results, error) in
             if results != nil {
@@ -82,7 +85,7 @@ open class NoDialogBoxShareViewController: UIViewController {
             }
         })
     }
-    
+
     private func handleInputURL(itemProvider: NSItemProvider) {
         itemProvider.loadItem(forTypeIdentifier: CONTENTTYPE_URL, options: nil, completionHandler: { [self] (results, error) in
             if results != nil {
@@ -101,7 +104,7 @@ open class NoDialogBoxShareViewController: UIViewController {
             }
         })
     }
-    
+
     private func handleInputImage(itemProvider: NSItemProvider) {
         itemProvider.loadItem(forTypeIdentifier: CONTENTTYPE_IMAGE, options: nil, completionHandler: { [self] (results, error) in
             if results != nil {
@@ -114,7 +117,22 @@ open class NoDialogBoxShareViewController: UIViewController {
             }
         })
     }
-    
+
+
+    private func handleInputPdf(itemProvider: NSItemProvider) {
+        itemProvider.loadItem(forTypeIdentifier: CONTENTTYPE_PDF, options: nil, completionHandler: { [self] (results, error) in
+            if results != nil {
+                let url = results as! URL?
+                let attachmentURL: AttachmentURL = AttachmentURL()
+                attachmentURL.title = url!.lastPathComponent
+                attachmentURL.url = getSharedFileUrl(url)
+                attachmentURL.type = "application/pdf"
+                self.attachmentsURL.append(attachmentURL)
+            }
+        })
+    }
+
+
     private func handleInputMovie(itemProvider: NSItemProvider) {
         itemProvider.loadItem(forTypeIdentifier: CONTENTTYPE_MOVIE, options: nil, completionHandler: { [self] (results, error) in
             if results != nil {
@@ -127,11 +145,11 @@ open class NoDialogBoxShareViewController: UIViewController {
             }
         })
     }
-    
+
     fileprivate func getSharedFileUrl(_ url: URL?) -> String {
         let fileManager = FileManager.default
-        
-        let copyFileUrl = fileManager.containerURL(forSecurityApplicationGroupIdentifier: getAppGroupId())!.absoluteString + "/" + url!.lastPathComponent
+
+        let copyFileUrl = fileManager.containerURL(forSecurityApplicationGroupIdentifier: getAppGroupId())!.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)! + "/" + url!.lastPathComponent.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
         
         try? Data(contentsOf: url!).write(to: URL(string: copyFileUrl)!)
         
@@ -188,4 +206,3 @@ open class NoDialogBoxShareViewController: UIViewController {
     }
     
 }
-
