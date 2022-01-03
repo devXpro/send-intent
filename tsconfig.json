@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "experimentalDecorators": true,
@@ -12,11 +13,11 @@
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "outDir": "dist/esm",
+    "outDir": "./dist/esm",
     "sourceMap": true,
     "target": "es2017"
   },
   "files": [
-    "src/index.ts"
+    "./src/index.ts"
   ]
 }
