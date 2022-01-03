@@ -49,5 +49,4 @@ public class SendIntentAppDelegateHelper {
         
         return true
     }
-
 }
