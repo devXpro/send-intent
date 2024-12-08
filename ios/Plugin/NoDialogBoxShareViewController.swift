@@ -192,17 +192,16 @@ open class NoDialogBoxShareViewController: UIViewController {
         let newParamValue = paramValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? ""
         return newParamValue
     }
-    
-    // info at: https://stackoverflow.com/a/44499222/13363449
-    @objc func openURL(_ url: URL) -> Bool {
+
+    @objc func openURL(_ url: URL) {
         var responder: UIResponder? = self
         while responder != nil {
             if let application = responder as? UIApplication {
-                return application.perform(#selector(openURL(_:)), with: url) != nil
+                application.open(url, options: [:], completionHandler: nil)
+                return
             }
             responder = responder?.next
         }
-        return false
     }
     
 }
